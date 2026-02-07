@@ -1,13 +1,14 @@
 import express from "express";
 import cors from "cors";
 import vipRoutes from "./routes/vipRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const app = express();
 
 app.use(cors({
-  origin: ["http://localhost:5174", "http://127.0.0.1:5174"], 
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
@@ -26,5 +27,6 @@ app.get("/", (req, res) => {
 /* ROUTES */
 app.use("/api/vip", vipRoutes);
 
+app.use("/api/admin", adminRoutes);
 
 export default app;
