@@ -1,5 +1,6 @@
 import VIP from "../models/VIP.js";
 import transporter from "../config/mailer.js";
+import { sendVIPStatusEmail } from "../utils/sendVIPStatusEmail.js";
 
 /* Create a new VIP request */
 
@@ -100,6 +101,10 @@ export const updateVIPStatus = async ( req, res ) => {
             return res.json(vip);
         }
         vip.status = status;
+        vip.statusHistory.push({
+            status,
+            changedBy: req.admin.id,
+        });
         await vip.save();
 
         await sendVIPStatusEmail(vip);

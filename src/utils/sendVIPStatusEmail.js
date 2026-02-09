@@ -1,4 +1,4 @@
-import transporter from "../config/mailer";
+import transporter from "../config/mailer.js";
 
 export const sendVIPStatusEmail = async ( vip ) => {
     let subject, html;
@@ -29,6 +29,6 @@ export const sendVIPStatusEmail = async ( vip ) => {
             html,
         });
     } catch (err) {
-        console.error("Email failed (VIP status update):", err.message);
+        console.error("Email failed (VIP status update):", err);
     };
 }
