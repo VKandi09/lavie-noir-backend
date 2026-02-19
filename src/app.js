@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import vipRoutes from "./routes/vipRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
 
 const app = express();
 
@@ -28,5 +29,7 @@ app.get("/", (req, res) => {
 app.use("/api/vip", vipRoutes);
 
 app.use("/api/admin", adminRoutes);
+
+app.use("/api/reservations", reservationRoutes);
 
 export default app;
