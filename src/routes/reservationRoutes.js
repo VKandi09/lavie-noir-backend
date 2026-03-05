@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
    ADMIN: Get All Reservations
 -------------------------- */
 
-router.get("/", protectAdmin, async (req, res) => {
+router.get("/", protectAdmin, async (_req, res) => {
   try {
     const reservations = await Reservation.find().sort({
         reservationDateTime: -1,
@@ -102,6 +102,61 @@ router.put("/:id/status", protectAdmin, async (req, res) => {
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Failed to update status" });
+  }
+});
+
+/* -------------------------
+   ADMIN: Update Full Reservation
+-------------------------- */
+
+router.put("/:id", protectAdmin, async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      reservationDate,
+      reservationTime,
+      partySize,
+      occasion,
+      notes,
+      status,
+    } = req.body;
+
+    if (!firstName || !lastName || !email || !phone || !reservationDate || !reservationTime || !partySize) {
+      return res.status(400).json({ message: "Required fields missing" });
+    }
+
+    const reservationDateTime = new Date(`${reservationDate} ${reservationTime}`);
+    if (isNaN(reservationDateTime.getTime())) {
+      return res.status(400).json({ message: "Invalid date or time" });
+    }
+
+    const updated = await Reservation.findByIdAndUpdate(
+      req.params.id,
+      { firstName, lastName, email, phone, reservationDateTime, partySize, occasion, notes, status },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) return res.status(404).json({ message: "Reservation not found" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update reservation" });
+  }
+});
+
+/* -------------------------
+   ADMIN: Delete Reservation
+-------------------------- */
+
+router.delete("/:id", protectAdmin, async (req, res) => {
+  try {
+    const deleted = await Reservation.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Reservation not found" });
+    res.json({ message: "Deleted" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete reservation" });
   }
 });
 

@@ -2,6 +2,46 @@ import VIP from "../models/VIP.js";
 import transporter from "../config/mailer.js";
 import { sendVIPStatusEmail } from "../utils/sendVIPStatusEmail.js";
 
+/* Get all VIP requests (admin) */
+
+export const getAllVIPs = async (_req, res) => {
+  try {
+    const vips = await VIP.find().sort({ createdAt: -1 });
+    res.json(vips);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch VIPs" });
+  }
+};
+
+/* Update a VIP entry (all fields) */
+
+export const updateVIP = async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, location, interest, message, status } = req.body;
+    const vip = await VIP.findByIdAndUpdate(
+      req.params.id,
+      { firstName, lastName, email, phone, location, interest, message, status },
+      { new: true, runValidators: true }
+    );
+    if (!vip) return res.status(404).json({ message: "VIP not found" });
+    res.json(vip);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update VIP" });
+  }
+};
+
+/* Delete a VIP entry */
+
+export const deleteVIP = async (req, res) => {
+  try {
+    const vip = await VIP.findByIdAndDelete(req.params.id);
+    if (!vip) return res.status(404).json({ message: "VIP not found" });
+    res.json({ message: "Deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete VIP" });
+  }
+};
+
 /* Create a new VIP request */
 
 export const createVIP = async (req, res) => {
@@ -15,7 +55,7 @@ export const createVIP = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const vip = await VIP.create({
+    await VIP.create({
       firstName,
       lastName,
       email,
@@ -62,7 +102,7 @@ export const createVIP = async (req, res) => {
 
 /* Get VIP statistics for admin dashboard */
 
-export const getVIPStats = async (req, res) => {
+export const getVIPStats = async (_req, res) => {
     const totalVIPs = await VIP.countDocuments();
     const pendingVIPs = await VIP.countDocuments({ status: "pending" });
     const confirmedVIPs = await VIP.countDocuments({ status: "confirmed" });
