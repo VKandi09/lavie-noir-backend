@@ -19,6 +19,13 @@ const reservationSchema = new mongoose.Schema(
       max: 20,
     },
 
+    location: {
+      type: String,
+      required: true,
+      enum: ["La Vie Night Club", "Noir Bar & Lounge"],
+      trim: true,
+    },
+
     occasion: { type: String, trim: true },
     notes: { type: String, trim: true },
 

@@ -15,6 +15,7 @@ router.post("/", async (req, res) => {
       lastName,
       email,
       phone,
+      location,
       reservationDate,
       reservationTime,
       partySize,
@@ -27,6 +28,7 @@ router.post("/", async (req, res) => {
       !lastName ||
       !email ||
       !phone ||
+      !location ||
       !reservationDate ||
       !reservationTime ||
       !partySize
@@ -53,6 +55,7 @@ router.post("/", async (req, res) => {
       lastName,
       email,
       phone,
+      location,
       reservationDateTime,
       partySize,
       occasion,
@@ -116,6 +119,7 @@ router.put("/:id", protectAdmin, async (req, res) => {
       lastName,
       email,
       phone,
+      location,
       reservationDate,
       reservationTime,
       partySize,
@@ -124,7 +128,7 @@ router.put("/:id", protectAdmin, async (req, res) => {
       status,
     } = req.body;
 
-    if (!firstName || !lastName || !email || !phone || !reservationDate || !reservationTime || !partySize) {
+    if (!firstName || !lastName || !email || !phone || !location || !reservationDate || !reservationTime || !partySize) {
       return res.status(400).json({ message: "Required fields missing" });
     }
 
@@ -135,7 +139,7 @@ router.put("/:id", protectAdmin, async (req, res) => {
 
     const updated = await Reservation.findByIdAndUpdate(
       req.params.id,
-      { firstName, lastName, email, phone, reservationDateTime, partySize, occasion, notes, status },
+      { firstName, lastName, email, phone, location, reservationDateTime, partySize, occasion, notes, status },
       { new: true, runValidators: true }
     );
 
