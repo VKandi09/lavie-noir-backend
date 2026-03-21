@@ -1,6 +1,7 @@
 import express from "express";
 import Reservation from "../models/Reservation.js";
 import { protectAdmin } from "../middlewares/adminAuth.js";
+import { sendReservationStatusEmail } from "../utils/sendReservationStatusEmail.js";
 
 const router = express.Router();
 
@@ -69,6 +70,31 @@ router.post("/", async (req, res) => {
 });
 
 /* -------------------------
+   ADMIN: Get Stats
+-------------------------- */
+
+router.get("/stats", protectAdmin, async (_req, res) => {
+  try {
+    const [total, pending, confirmed, declined, recent] = await Promise.all([
+      Reservation.countDocuments(),
+      Reservation.countDocuments({ status: "pending" }),
+      Reservation.countDocuments({ status: "confirmed" }),
+      Reservation.countDocuments({ status: "declined" }),
+      Reservation.find().sort({ createdAt: -1 }).limit(5),
+    ]);
+    res.json({
+      totalReservations: total,
+      pendingReservations: pending,
+      confirmedReservations: confirmed,
+      declinedReservations: declined,
+      recent,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch stats" });
+  }
+});
+
+/* -------------------------
    ADMIN: Get All Reservations
 -------------------------- */
 
@@ -102,6 +128,7 @@ router.put("/:id/status", protectAdmin, async (req, res) => {
     if (!updated) {
       return res.status(404).json({ message: "Reservation not found" });
     }
+    sendReservationStatusEmail(updated);
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: "Failed to update status" });

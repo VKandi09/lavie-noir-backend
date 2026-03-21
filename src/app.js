@@ -6,16 +6,22 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "https://lavie-noir.netlify.app",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], 
+  origin: allowedOrigins,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
 
 app.use(express.json());
 
-/* TEMP DEBUG MODE — ALLOW EVERYTHING */
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log("➡️ Incoming:", req.method, req.url);
   next();
 });
