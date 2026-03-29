@@ -2,6 +2,7 @@ import express from "express";
 import Reservation from "../models/Reservation.js";
 import { protectAdmin } from "../middlewares/adminAuth.js";
 import { sendReservationStatusEmail } from "../utils/sendReservationStatusEmail.js";
+import transporter from "../config/mailer.js";
 
 const router = express.Router();
 
@@ -62,6 +63,37 @@ router.post("/", async (req, res) => {
       occasion,
       notes,
     });
+
+    const formattedDateTime = reservationDateTime.toLocaleString("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    // Guest confirmation email
+    try {
+      await transporter.sendMail({
+        to: email,
+        subject: "Reservation Request Received 🥂",
+        html: `<p>Hi ${firstName},</p>
+          <p>We've received your reservation request at <strong>${location}</strong> for <strong>${formattedDateTime}</strong> (party of ${partySize}).</p>
+          <p>Our host team will contact you shortly to confirm. Get ready for an elevated experience.</p>`,
+      });
+    } catch (err) {
+      console.error("Email failed (guest confirmation):", err.message);
+    }
+
+    // Admin notification email
+    try {
+      await transporter.sendMail({
+        to: process.env.VIP_HOST_EMAIL,
+        subject: "New Reservation Request",
+        html: `<p><strong>${firstName} ${lastName}</strong> has submitted a reservation request.</p>
+          <p>Location: ${location}<br/>Date & Time: ${formattedDateTime}<br/>Party Size: ${partySize}${occasion ? `<br/>Occasion: ${occasion}` : ""}</p>
+          <p>Email: ${email} | Phone: ${phone}</p>`,
+      });
+    } catch (err) {
+      console.error("Email failed (admin notification):", err.message);
+    }
 
     res.status(201).json(reservation);
   } catch (err) {
